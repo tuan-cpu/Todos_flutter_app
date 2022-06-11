@@ -2,11 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'home.dart';
-
 class DescriptionPage extends StatelessWidget {
   final String title, description, time, uid;
   final bool completeness;
+
   const DescriptionPage(
       {Key? key,
       required this.title,
@@ -24,11 +23,12 @@ class DescriptionPage extends StatelessWidget {
         .collection('my_tasks')
         .doc(time);
     return Scaffold(
-      appBar: AppBar(title: Text(
-        title,
-        style:
-        GoogleFonts.roboto(fontSize: 24, fontWeight: FontWeight.bold),
-      ),),
+      appBar: AppBar(
+        title: Text(
+          title,
+          style: GoogleFonts.roboto(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,11 +42,13 @@ class DescriptionPage extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: completeness?Colors.red:Colors.green,
+        backgroundColor: completeness ? Colors.red : Colors.green,
         onPressed: () {
-          doc.update({'completeness': !completeness}).then((value) => Navigator.pop(context));
+          doc.update({'completeness': !completeness}).then(
+              (value) => Navigator.pop(context));
         },
-        child: completeness?const Icon(Icons.cancel):const Icon(Icons.check),
+        child:
+            completeness ? const Icon(Icons.cancel) : const Icon(Icons.check),
       ),
     );
   }

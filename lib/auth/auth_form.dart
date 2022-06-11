@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/utils/inputValidate.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AuthForm extends StatefulWidget {
@@ -15,6 +16,9 @@ class _AuthFormState extends State<AuthForm> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final usernameController = TextEditingController();
+  bool emailValidate = false;
+  bool passwordValidate = false;
+  bool usernameValidate = false;
 
   @override
   void dispose() {
@@ -28,8 +32,22 @@ class _AuthFormState extends State<AuthForm> {
   bool isLoginPage = false;
 
   submit() async {
+    setState(() {
+      emailValidate = false;
+      passwordValidate = false;
+      usernameValidate = false;
+    });
     final auth = FirebaseAuth.instance;
     UserCredential userCredential;
+    setState(() {
+      emailValidate = InputValidate.validate(emailController.text);
+      passwordValidate = InputValidate.validate(passwordController.text);
+    });
+    if (!isLoginPage) {
+      setState(() {
+        usernameValidate = InputValidate.validate(usernameController.text);
+      });
+    }
     try {
       if (isLoginPage) {
         userCredential = await auth.signInWithEmailAndPassword(
@@ -74,6 +92,11 @@ class _AuthFormState extends State<AuthForm> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  if (!isLoginPage && usernameValidate)
+                    const Text(
+                      'Username must not empty',
+                      style: TextStyle(fontSize: 10, color: Colors.red),
+                    ),
                   if (!isLoginPage)
                     TextField(
                       controller: usernameController,
@@ -90,6 +113,11 @@ class _AuthFormState extends State<AuthForm> {
                   const SizedBox(
                     height: 10,
                   ),
+                  if (emailValidate)
+                    const Text(
+                      'Email must not be empty!',
+                      style: TextStyle(color: Colors.red, fontSize: 10),
+                    ),
                   TextField(
                     keyboardType: TextInputType.emailAddress,
                     controller: emailController,
@@ -105,6 +133,11 @@ class _AuthFormState extends State<AuthForm> {
                   const SizedBox(
                     height: 10,
                   ),
+                  if (passwordValidate)
+                    const Text(
+                      'Password must not be empty!',
+                      style: TextStyle(color: Colors.red, fontSize: 10),
+                    ),
                   TextField(
                     obscureText: true,
                     keyboardType: TextInputType.emailAddress,

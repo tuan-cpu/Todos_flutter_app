@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/pages/home.dart';
+import 'package:flutter_project/utils/dateValidate.dart';
+import 'package:flutter_project/utils/inputValidate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,6 +19,8 @@ class _AddTaskState extends State<AddTask> {
   bool titleValidate = false;
   bool descriptionValidate = false;
   DateTime selectedDate = DateTime.now();
+  bool dateValidate = true;
+
   @override
   void dispose() {
     titleController.dispose();
@@ -26,43 +29,40 @@ class _AddTaskState extends State<AddTask> {
   }
 
   addTask() async {
-    setState((){
+    setState(() {
       titleValidate = false;
       descriptionValidate = false;
     });
     FirebaseAuth auth = FirebaseAuth.instance;
-    User user = auth.currentUser!;`
+    User user = auth.currentUser!;
     String uid = user.uid;
     var time = DateTime.now();
-    if( titleController.text.isEmpty){
-      setState((){
-        titleValidate = true;
-      });
-    }
-    if( descriptionController.text.isEmpty){
-      setState((){
-        descriptionValidate = true;
-      });
-    }
-    if(!titleValidate && !descriptionValidate) {
-      await FirebaseFirestore.instance
-        .collection('task')
-        .doc(uid)
-        .collection('my_tasks')
-        .doc(time.toString())
-        .set({
-      'title': titleController.text.trim(),
-      'description': descriptionController.text.trim(),
-      'time': time.toString(),
-      'timestamp': time,
-      'completeness': false,
-      'deadline': selectedDate
+    setState(() {
+      titleValidate = InputValidate.validate(titleController.text);
+      descriptionValidate = InputValidate.validate(descriptionController.text);
     });
+    if (!titleValidate && !descriptionValidate && dateValidate) {
+      await FirebaseFirestore.instance
+          .collection('task')
+          .doc(uid)
+          .collection('my_tasks')
+          .doc(time.toString())
+          .set({
+        'title': titleController.text.trim(),
+        'description': descriptionController.text.trim(),
+        'time': time.toString(),
+        'timestamp': time,
+        'completeness': false,
+        'deadline': selectedDate
+      });
       Fluttertoast.showToast(msg: 'Task added');
     }
   }
 
   _selectDate(BuildContext context) async {
+    setState(() {
+      selectedDate = DateTime.now();
+    });
     final DateTime? selected = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -71,8 +71,13 @@ class _AddTaskState extends State<AddTask> {
     );
     if (selected != selectedDate) {
       setState(() {
-        selectedDate = selected!;
+        dateValidate = DateValidate.validate(selected!);
       });
+      if (dateValidate) {
+        setState(() {
+          selectedDate = selected!;
+        });
+      }
     }
   }
 
@@ -124,8 +129,14 @@ class _AddTaskState extends State<AddTask> {
               const SizedBox(
                 height: 10,
               ),
-              Text(
-                  "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"),
+              if (!dateValidate)
+                const Text(
+                  'Cannot choose the date before today!',
+                  style: TextStyle(fontSize: 10, color: Colors.red),
+                ),
+              if (dateValidate)
+                Text(
+                    "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"),
               const SizedBox(
                 height: 10,
               ),
@@ -135,7 +146,7 @@ class _AddTaskState extends State<AddTask> {
                   child: ElevatedButton(
                     onPressed: () {
                       addTask();
-                      if(!titleValidate && !descriptionValidate){
+                      if (!titleValidate && !descriptionValidate) {
                         titleController.clear();
                         descriptionController.clear();
                       }

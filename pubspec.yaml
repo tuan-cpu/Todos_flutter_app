@@ -43,8 +43,6 @@ dependencies:
 
 dev_dependencies:
   test:
-  mockito:
-  build_runner:
   flutter_test:
     sdk: flutter
 

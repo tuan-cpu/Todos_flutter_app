@@ -5,14 +5,14 @@ import 'package:flutter_project/pages/description.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class AllTaskPage extends StatefulWidget {
+  const AllTaskPage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<AllTaskPage> createState() => _AllTaskPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _AllTaskPageState extends State<AllTaskPage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   String uid = '';
